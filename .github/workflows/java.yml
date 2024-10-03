@@ -61,5 +61,3 @@ jobs:
           file: ./java/${{ matrix.tag }}/Dockerfile
           push: true
           tags: ghcr.io/leafdtk/images:java_${{ matrix.tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
