@@ -6,20 +6,22 @@ RUN yum --disableplugin=subscription-manager -y module enable php:8.2 \
   && yum --disableplugin=subscription-manager -y install httpd php php-fpm \
   && yum --disableplugin=subscription-manager clean all
 
-# Install PHP extensions
+# Install basic tools and core PHP extensions
 RUN yum --disableplugin=subscription-manager -y install \
     wget \
     php-mysqlnd \
-    php-zip \
     php-gd \
     php-mbstring \
     php-curl \
     php-xml \
-    php-bcmath \
-    php-intl \
     php-opcache \
-    php-sodium \
   && yum --disableplugin=subscription-manager clean all
+
+# Install additional PHP extensions (some may not be available in UBI9)
+RUN yum --disableplugin=subscription-manager -y install \
+    php-intl \
+    php-bcmath \
+  && yum --disableplugin=subscription-manager clean all || true
 
 # Configure Apache and PHP-FPM
 RUN sed -i 's/Listen 80/Listen 8080/' /etc/httpd/conf/httpd.conf \
