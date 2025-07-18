@@ -1,14 +1,9 @@
 # Use UBI9 for access to newer PHP versions
 FROM registry.access.redhat.com/ubi9/ubi:latest
 
-# Install EPEL and Remi repositories for PHP 8.4
-RUN yum --disableplugin=subscription-manager -y install epel-release \
-  && yum --disableplugin=subscription-manager -y install https://rpms.remirepo.net/enterprise/remi-release-9.rpm \
-  && yum --disableplugin=subscription-manager -y module enable php:remi-8.4 \
-  && yum --disableplugin=subscription-manager clean all
-
-# Install Apache and PHP 8.4
-RUN yum --disableplugin=subscription-manager -y install httpd php php-fpm \
+# Check available PHP modules and install PHP 8.2 (latest available in UBI9)
+RUN yum --disableplugin=subscription-manager -y module enable php:8.2 \
+  && yum --disableplugin=subscription-manager -y install httpd php php-fpm \
   && yum --disableplugin=subscription-manager clean all
 
 # Install PHP extensions
@@ -21,7 +16,6 @@ RUN yum --disableplugin=subscription-manager -y install \
     php-curl \
     php-xml \
     php-bcmath \
-    php-json \
     php-intl \
     php-opcache \
     php-sodium \
@@ -30,7 +24,7 @@ RUN yum --disableplugin=subscription-manager -y install \
 # Configure Apache and PHP-FPM
 RUN sed -i 's/Listen 80/Listen 8080/' /etc/httpd/conf/httpd.conf \
   && sed -i 's/listen.acl_users = apache,nginx/listen.acl_users =/' /etc/php-fpm.d/www.conf \
-  && mkdir /run/php-fpm \
+  && mkdir -p /run/php-fpm \
   && chgrp -R 0 /var/log/httpd /var/run/httpd /run/php-fpm \
   && chmod -R g=u /var/log/httpd /var/run/httpd /run/php-fpm
 
@@ -41,7 +35,7 @@ RUN wget -O mediawiki.tar.gz https://releases.wikimedia.org/mediawiki/1.44/media
   && chgrp -R 0 /var/www/html/ /var/lib/php/ \
   && chmod -R g=u /var/www/html/ /var/lib/php/
 
-# Verify PHP version (optional - can be removed)
+# Verify PHP version
 RUN php -v
 
 EXPOSE 8080
